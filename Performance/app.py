@@ -29,21 +29,27 @@ Strategy_Names_Dict = {l:l for l in Strategy_Names}
 #%% app
 app_ui = ui.page_fluid(
     ui.panel_title('Global Macro Performance Review'),
-    ui.layout_sidebar(
-        ui.panel_sidebar(
+    ui.row(
+        ui.column(4,
             ui.input_selectize(id="Strategy", label="Choose Strategies", choices=Strategy_Names_Dict, selected='Total', multiple=True),
             ui.input_date_range(id='date_range', label='Date Range', start=date_range_start, end=date_range_end,),
             ui.input_radio_buttons(id="rb", label="Style Correlation", choices={"a": "Correlation On", "b":"Correlation Off"}, selected="a")    
         ),
-        ui.panel_main(
-            ui.output_plot("plotTimeseries"),
-            ui.output_table("Stat_table", style="text-align:center;"),
-            ui.output_table("Corr_table", style="text-align:center;")
+        ui.column(7,
+            ui.output_plot("plotTimeseries")),
+        ui.column(1,)
         ),
-        
-), 
-
-)
+    ui.row(
+        ui.column(4,),
+        ui.column(7, ui.output_table("Stat_table", style="text-align:center;")),
+        ui.column(1,)
+    ),
+    ui.row(
+        ui.column(4),
+        ui.column(7, ui.output_table("Corr_table", style="text-align:center;")),
+        ui.column(1,)
+    )   
+) 
 
 #%%
 def server(input: Inputs, output: Outputs, session: Session):
