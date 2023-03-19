@@ -27,16 +27,25 @@ Strategy_Names = Performance_Long['Strategy'].unique()
 Strategy_Names_Dict = {l:l for l in Strategy_Names}
 
 #%% app
+def panel_box(*args, **kwargs):
+    return ui.div(
+        ui.div(*args, class_="card-body"),
+        **kwargs,
+        class_="card mb-3",
+    )
+
+
 app_ui = ui.page_fluid(
     ui.panel_title('Global Macro Performance Review'),
     ui.row(
         ui.column(4,
-            ui.input_selectize(id="Strategy", label="Choose Strategies", choices=Strategy_Names_Dict, selected='Total', multiple=True),
-            ui.input_date_range(id='date_range', label='Date Range', start=date_range_start, end=date_range_end,),
-            ui.input_radio_buttons(id="rb", label="Style Correlation", choices={"a": "Correlation On", "b":"Correlation Off"}, selected="a")    
+                  panel_box(
+                    ui.input_selectize(id="Strategy", label="Choose Strategies", choices=Strategy_Names_Dict, selected=["Total", "Fundamental", "Tactical", "Momentum", "Target"], multiple=True,),
+                    ui.input_date_range(id='date_range', label='Date Range', start=date_range_start, end=date_range_end,),
+                    ui.input_radio_buttons(id="rb", label="Style Correlation", choices={"a": "Correlation On", "b":"Correlation Off"}, selected="a"), style="background-color:#D3D3D3")    
         ),
         ui.column(7,
-            ui.output_plot("plotTimeseries")),
+            ui.output_plot("plotTimeseries", width="100%")),
         ui.column(1,)
         ),
     ui.row(
@@ -154,7 +163,7 @@ def server(input: Inputs, output: Outputs, session: Session):
     @output
     @render.plot
     def plotTimeseries():
-        g = ggplot(performance_filt(), aes('Date_Time', 'Performance', color="Strategy")) + geom_line() + theme(plot_background=element_rect(fill='white'), panel_background=element_rect(fill='white'), rect=element_rect(color='black', size=1, fill='#fff'), axis_text_x=element_text(rotation=90, hjust=1), panel_grid_major_y=element_line(color="grey"), legend_position="right", legend_margin=(20)) + labs(x = 'Date', y='Performance Index', title='Global Macro Strategy Performance') + coord_cartesian(ylim=[98,103])
+        g = ggplot(performance_filt(), aes('Date_Time', 'Performance', color="Strategy")) + geom_line() + theme(plot_background=element_rect(fill='white'), panel_background=element_rect(fill='white'), rect=element_rect(size=0, fill='#fff'), axis_text_x=element_text(rotation=90, hjust=1), panel_grid_major_y=element_line(color="grey"), legend_position="right", legend_margin=(20)) + labs(x = 'Date', y='Performance Index', title='Global Macro Strategy Performance') + coord_cartesian(ylim=[98,103])
         return g
     
     @output
