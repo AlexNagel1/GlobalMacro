@@ -32,13 +32,13 @@ app_ui = ui.page_fluid(
     ui.layout_sidebar(
         ui.panel_sidebar(
             ui.input_selectize(id="Strategy", label="Choose Strategies", choices=Strategy_Names_Dict, selected='Total', multiple=True),
-            ui.input_date_range(id='date_range', label='Date Range', start=date_range_start, end=date_range_end, ),
-            
+            ui.input_date_range(id='date_range', label='Date Range', start=date_range_start, end=date_range_end,),
+            ui.input_radio_buttons(id="rb", label="Style Correlation", choices={"a": "Correlation On", "b":"Correlation Off"}, selected="a")    
         ),
         ui.panel_main(
             ui.output_plot("plotTimeseries"),
-            ui.output_table("table", style="text-align:center;")
-            
+            ui.output_table("Stat_table", style="text-align:center;"),
+            ui.output_table("Corr_table", style="text-align:center;")
         ),
         
 ), 
@@ -69,6 +69,8 @@ def server(input: Inputs, output: Outputs, session: Session):
         
         # Calculate Performance over period
         k = len(data_Total)-1
+        #m = int(date_selected_start)
+        #print(m)
         perf_Total = (data_Total[k] / data_Total[0]) -1
         perf_Total_ann = (data_Total[k] / data_Total[0]) ** (250/k) -1
         perf_Total_f = "{:.2%}".format(perf_Total)
@@ -112,12 +114,37 @@ def server(input: Inputs, output: Outputs, session: Session):
         ir_Momentum_f = "%.2f" % (ir_Momentum)
         ir_Tactical = perf_Tactical_ann / stdev_Tactical
         ir_Tactical_f = "%.2f" % (ir_Tactical)
-
+                
         table = pd.DataFrame({'Strategy': ['Total', 'Fundamental', 'Momentum', "Tactical"], 'Performance': [perf_Total_f, perf_Fundamental_f, perf_Momentum_f, perf_Tactical_f], 'Performance (ann)': [perf_Total_ann_f, perf_Fundamental_ann_f, perf_Momentum_ann_f, perf_Tactical_ann_f], 'Volatility': [stdev_Total_f, stdev_Fundamental_f, stdev_Momentum_f, stdev_Tactical_f], "IR": [ir_Total_f,ir_Fundamental_f,ir_Momentum_f,ir_Tactical_f]})
         
         tab = table.loc[(table['Strategy'].isin(list(input.Strategy())))]
         return tab
+    
+    # Calculation for Stats Table
+    @reactive.Calc
+    def corr_table():
+        #Calculate Correlations
+        date_selected_start = str(input.date_range()[0])
+        date_selected_end = str(input.date_range()[1])
+        
+        data_Tactical = Performance_Long.loc[(Performance_Long['Strategy'] == "Tactical") & (Performance_Long['Date_Time']>= date_selected_start) & (Performance_Long['Date_Time']<= date_selected_end)]["Performance"].reset_index(drop=True)
+        data_Momentum = Performance_Long.loc[(Performance_Long['Strategy'] == "Momentum") & (Performance_Long['Date_Time']>= date_selected_start) & (Performance_Long['Date_Time']<= date_selected_end)]["Performance"].reset_index(drop=True)
+        data_Fundamental = Performance_Long.loc[(Performance_Long['Strategy'] == "Fundamental") & (Performance_Long['Date_Time']>= date_selected_start) & (Performance_Long['Date_Time']<= date_selected_end)]["Performance"].reset_index(drop=True)
+        
+        returns_Fundamental = data_Fundamental.pct_change()
+        returns_Tactical = data_Tactical.pct_change()
+        returns_Momentum = data_Momentum.pct_change()
 
+        corr_Momentum_Tactical = "{:.2}".format(returns_Momentum.corr(returns_Tactical))
+        corr_Momentum_Fundamental = "{:.2}".format(returns_Momentum.corr(returns_Fundamental))
+        corr_Tactical_Fundamental = "{:.2}".format(returns_Tactical.corr(returns_Fundamental))
+
+        corr_tab = pd.DataFrame({'Correlation': ['Fundamental', 'Momentum', "Tactical"], 'Fundamental': [1,corr_Momentum_Fundamental , corr_Tactical_Fundamental], 'Momentum': ["", 1, corr_Momentum_Tactical], 'Tactical': ["", "", 1]})
+
+        return corr_tab
+
+
+    # Output
     @output
     @render.plot
     def plotTimeseries():
@@ -126,9 +153,18 @@ def server(input: Inputs, output: Outputs, session: Session):
     
     @output
     @render.table
-    def table():
+    def Stat_table():
         stats = stat_table()
         return stats
+    
+    @output
+    @render.table
+    def Corr_table():
+        if input.rb() == "a":
+            corr = corr_table()
+        else:
+            corr = pd.DataFrame()
+        return corr
     
 app = App(app_ui, server)
 
