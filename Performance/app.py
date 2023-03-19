@@ -69,10 +69,6 @@ def server(input: Inputs, output: Outputs, session: Session):
         
         # Calculate Performance over period
         k = len(data_Total)-1
-        print(data_Total[0])
-        print(data_Total[k])
-        print((data_Total[k] / data_Total[0]))
-        print(np.sqrt(365/k))
         perf_Total = (data_Total[k] / data_Total[0]) -1
         perf_Total_ann = (data_Total[k] / data_Total[0]) ** (250/k) -1
         perf_Total_f = "{:.2%}".format(perf_Total)
@@ -80,18 +76,18 @@ def server(input: Inputs, output: Outputs, session: Session):
    
         perf_Tactical = (data_Tactical[k] / data_Tactical[0]) -1
         perf_Tactical_ann = (data_Tactical[k] / data_Tactical[0])  ** (250/k) -1
-        perf_Tactical_f = "%.2f%%" % (perf_Tactical*100)
-        perf_Tactical_ann_f = "%.2f%%" % (perf_Tactical_ann*100)
+        perf_Tactical_f = "{:.2%}".format(perf_Tactical)
+        perf_Tactical_ann_f = "{:.2%}".format(perf_Tactical_ann)
         
         perf_Momentum = (data_Momentum[k] / data_Momentum[0]) -1
         perf_Momentum_ann = (data_Momentum[k] / data_Momentum[0])  **(250/k) -1
-        perf_Momentum_f = "%.2f%%" % (perf_Momentum*100)
-        perf_Momentum_ann_f = "%.2f%%" % ((perf_Momentum_ann)*100)
+        perf_Momentum_f = "{:.2%}".format(perf_Momentum)
+        perf_Momentum_ann_f = "{:.2%}".format(perf_Momentum_ann)
         
         perf_Fundamental = (data_Fundamental[k] / data_Fundamental[0]) -1
         perf_Fundamental_ann = (data_Fundamental[k] / data_Fundamental[0])  ** (250/k) -1
-        perf_Fundamental_f = "%.2f%%" % (perf_Fundamental*100)
-        perf_Fundamental_ann_f = "%.2f%%" % ((perf_Fundamental_ann)*100)
+        perf_Fundamental_f = "{:.2%}".format(perf_Fundamental)
+        perf_Fundamental_ann_f = "{:.2%}".format(perf_Fundamental_ann)
 
         #Calculate Volatility over period
         returns_Total = data_Total.pct_change()
@@ -117,12 +113,8 @@ def server(input: Inputs, output: Outputs, session: Session):
         ir_Tactical = perf_Tactical_ann / stdev_Tactical
         ir_Tactical_f = "%.2f" % (ir_Tactical)
 
-        #table = pd.DataFrame({'Strategy': ['Total', 'Fundamental', 'Momentum', "Tactical"], 'Performance': [perf_Total_f, perf_Fundamental_f, perf_Momentum_f, perf_Tactical_f], 'Performance (ann)': [perf_Total_ann_f, perf_Fundamental_ann_f, perf_Momentum_ann_f, perf_Tactical_ann_f], 'Volatility': [stdev_Total_f, stdev_Fundamental_f, stdev_Momentum_f, stdev_Tactical_f], "IR": [ir_Total_f,ir_Fundamental_f,ir_Momentum_f,ir_Tactical_f]})
+        table = pd.DataFrame({'Strategy': ['Total', 'Fundamental', 'Momentum', "Tactical"], 'Performance': [perf_Total_f, perf_Fundamental_f, perf_Momentum_f, perf_Tactical_f], 'Performance (ann)': [perf_Total_ann_f, perf_Fundamental_ann_f, perf_Momentum_ann_f, perf_Tactical_ann_f], 'Volatility': [stdev_Total_f, stdev_Fundamental_f, stdev_Momentum_f, stdev_Tactical_f], "IR": [ir_Total_f,ir_Fundamental_f,ir_Momentum_f,ir_Tactical_f]})
         
-        table = pd.DataFrame({'Strategy': ['Total', 'Fundamental', 'Momentum', "Tactical"], 'Performance': [perf_Total_f, 1, 2, 3], 'Performance (ann)': [perf_Total_ann_f, 2, 3, 4], 'Volatility': [2, 3, 4, 5], "IR": [2,3,4,5]})
-
-
-
         tab = table.loc[(table['Strategy'].isin(list(input.Strategy())))]
         return tab
 
