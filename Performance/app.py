@@ -75,11 +75,9 @@ def server(input: Inputs, output: Outputs, session: Session):
         print(np.sqrt(365/k))
         perf_Total = (data_Total[k] / data_Total[0]) -1
         perf_Total_ann = (data_Total[k] / data_Total[0]) ** (250/k) -1
-        #perf_Total_f = "%.2f%%" % (perf_Total *100)
-        perf_Total_f = perf_Total
-        #perf_Total_ann_f = "%.2f%%" % (perf_Total_ann*100)
-        perf_Total_ann_f = perf_Total_ann
-
+        perf_Total_f = "{:.2%}".format(perf_Total)
+        perf_Total_ann_f = "{:.2%}".format(perf_Total_ann)
+   
         perf_Tactical = (data_Tactical[k] / data_Tactical[0]) -1
         perf_Tactical_ann = (data_Tactical[k] / data_Tactical[0])  ** (250/k) -1
         perf_Tactical_f = "%.2f%%" % (perf_Tactical*100)
