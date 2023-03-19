@@ -1,6 +1,7 @@
 #%% packages
 from shiny import Inputs, Outputs, Session, App, reactive, render, req, ui
 import pandas as pd
+import jinja2 as jn
 import numpy as np
 from plotnine import ggplot, aes, geom_line, geom_smooth, coord_cartesian, labs, scale_color_discrete, theme_bw, coord_cartesian, theme, element_rect, element_line, element_text, annotate, geom_vline, scale_color_manual
 import seaborn as sns
@@ -74,9 +75,11 @@ def server(input: Inputs, output: Outputs, session: Session):
         print(np.sqrt(365/k))
         perf_Total = (data_Total[k] / data_Total[0]) -1
         perf_Total_ann = (data_Total[k] / data_Total[0]) ** (250/k) -1
-        perf_Total_f = "%.2f%%" % (perf_Total *100)
-        perf_Total_ann_f = "%.2f%%" % (perf_Total_ann*100)
-        
+        #perf_Total_f = "%.2f%%" % (perf_Total *100)
+        perf_Total_f = perf_Total
+        #perf_Total_ann_f = "%.2f%%" % (perf_Total_ann*100)
+        perf_Total_ann_f = perf_Total_ann
+
         perf_Tactical = (data_Tactical[k] / data_Tactical[0]) -1
         perf_Tactical_ann = (data_Tactical[k] / data_Tactical[0])  ** (250/k) -1
         perf_Tactical_f = "%.2f%%" % (perf_Tactical*100)
@@ -116,8 +119,12 @@ def server(input: Inputs, output: Outputs, session: Session):
         ir_Tactical = perf_Tactical_ann / stdev_Tactical
         ir_Tactical_f = "%.2f" % (ir_Tactical)
 
-        table = pd.DataFrame({'Strategy': ['Total', 'Fundamental', 'Momentum', "Tactical"], 'Performance': [perf_Total_f, perf_Fundamental_f, perf_Momentum_f, perf_Tactical_f], 'Performance (ann)': [perf_Total_ann_f, perf_Fundamental_ann_f, perf_Momentum_ann_f, perf_Tactical_ann_f], 'Volatility': [stdev_Total_f, stdev_Fundamental_f, stdev_Momentum_f, stdev_Tactical_f], "IR": [ir_Total_f,ir_Fundamental_f,ir_Momentum_f,ir_Tactical_f]})
-        print(table)
+        #table = pd.DataFrame({'Strategy': ['Total', 'Fundamental', 'Momentum', "Tactical"], 'Performance': [perf_Total_f, perf_Fundamental_f, perf_Momentum_f, perf_Tactical_f], 'Performance (ann)': [perf_Total_ann_f, perf_Fundamental_ann_f, perf_Momentum_ann_f, perf_Tactical_ann_f], 'Volatility': [stdev_Total_f, stdev_Fundamental_f, stdev_Momentum_f, stdev_Tactical_f], "IR": [ir_Total_f,ir_Fundamental_f,ir_Momentum_f,ir_Tactical_f]})
+        
+        table = pd.DataFrame({'Strategy': ['Total', 'Fundamental', 'Momentum', "Tactical"], 'Performance': [perf_Total_f, 1, 2, 3], 'Performance (ann)': [perf_Total_ann_f, 2, 3, 4], 'Volatility': [2, 3, 4, 5], "IR": [2,3,4,5]})
+
+
+
         tab = table.loc[(table['Strategy'].isin(list(input.Strategy())))]
         return tab
 
